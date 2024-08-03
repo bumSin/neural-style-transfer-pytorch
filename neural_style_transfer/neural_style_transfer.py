@@ -15,6 +15,9 @@ def initiate_style_transfer(arguments):
     content_image_tensor = getImageTensor(arguments['content_images_dir'], arguments['content_img_name'])
     style_image_tensor = getImageTensor(arguments['style_images_dir'], arguments['style_img_name'])
 
+    # visualize_tensor(content_image_tensor)
+    # visualize_tensor(style_image_tensor)
+
     if arguments['init_strategy'] == 'white_noise':
         init_image_tensor = torch.rand(3, 224, 224)
     else:
@@ -60,8 +63,8 @@ if __name__ == "__main__":
     img_format = (4, '.jpg')  # saves images in the format: %04d.jpg
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--content_img_name", type=str, help="content image file name", default="v")
-    parser.add_argument("--style_img_name", type=str, help="style image file name", default="v")
+    parser.add_argument("--content_img_name", type=str, help="content image file name", default="cute_doggo.png")
+    parser.add_argument("--style_img_name", type=str, help="style image file name", default="starry_night.png")
     parser.add_argument("--init_strategy", type=str, help="strategy to initiate base image", default="content")
     parser.add_argument("--epochs", type=int, help="count of epochs", default=100)
 
