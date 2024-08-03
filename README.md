@@ -1,5 +1,3 @@
-# neural-style-transfer-pytorch
-
 # Neural Style Transfer in PyTorch using Forward Hooks
 
 ## Table of Contents
