@@ -11,18 +11,20 @@ layerIndexes = [3, 8, 15, 22]
 
 activations = {}
 
-def getFeaturesOfStyleAndContentImage(model, style_image_tensor, content_image_tensor):
-    content_image_features = forward_pass(model, content_image_tensor)
-    style_image_features = forward_pass(model, style_image_tensor)
-
-    return (style_image_features,
-            content_image_features[1])  # only relu2_2 is used for content features
-
 # hook function to capture activations
 def getActivations(layer_indx):
     def hook(model, input, output):
         activations[layer_indx] = output
     return hook
+
+def getFeaturesOfStyleAndContentImage(model, style_image_tensor, content_image_tensor):
+    model(content_image_tensor)
+    content_image_features = [activations[layerIndex] for layerIndex in layerIndexes]
+
+    model(style_image_tensor)
+    style_image_features = [activations[layerIndex] for layerIndex in layerIndexes]
+
+    return style_image_features, content_image_features[1]  # only relu2_2 is used for content features
 
 def prepareModel(content_layer, style_layers):
     model = models.vgg16(pretrained=True)
@@ -40,12 +42,9 @@ def prepareModel(content_layer, style_layers):
     return model
 
 # makes a forward pass through models and returns the features accumulated by hooks
-def forward_pass(model, image_tensor):
-    batch_tensor = image_tensor.unsqueeze(0)  # Adding a dummy batch dimension
+def forward_pass(model, batch_tensor):
     model(batch_tensor)
-    feature_maps = [activations[layerIndex].squeeze(0) for layerIndex in layerIndexes]  # removing the dummy dimension and putting all values in a list
-    activations.clear()  # Clearing for next pass, this is optional as next pass will just override the map
-
+    feature_maps = [activations[layerIndex] for layerIndex in layerIndexes]  # removing the dummy dimension and putting all values in a list
     return feature_maps
 
 
@@ -104,7 +103,4 @@ VGG(
     (6): Linear(in_features=4096, out_features=1000, bias=True)
   )
 )
-
-
-
 '''

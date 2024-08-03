@@ -45,7 +45,7 @@ def convertImageToVGG16InputTensor(image_path):
 
 def tensor_to_image(img_tensor):
     # Assuming the tensor is in the format [C, H, W]
-
+    img_tensor = img_tensor.squeeze(0)
     # Convert tensor to numpy array
     image_np = img_tensor.numpy()
 
