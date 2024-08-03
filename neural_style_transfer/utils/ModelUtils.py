@@ -1,4 +1,3 @@
-import copy
 from torchvision import models
 
 layerNameToIndexMap = {

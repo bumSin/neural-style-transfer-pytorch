@@ -4,11 +4,8 @@ import os.path
 
 from utils.ImageUtils import *
 from utils.ModelUtils import *
+from services.LossService import *
 
-
-def calculateLoss(style_features_of_style_image, content_features_of_content_image, all_features_of_init_image):
-    total_loss = 0
-    return total_loss
 
 
 def initiate_style_transfer(arguments):
@@ -35,23 +32,25 @@ def initiate_style_transfer(arguments):
     optimizer = torch.optim.Adam([init_image_tensor], lr=0.01)
 
     # Features of style image and content image won't change, hence calculating only once
-    style_features_of_style_image, content_features_of_content_image = getFeaturesOfStyleAndContentImage(model,
+    style_image_features, content_image_features = getFeaturesOfStyleAndContentImage(model,
         style_image_tensor, content_image_tensor)
 
-    for feature in style_features_of_style_image:
-        print(f"Shape of style_features_of_style_image: {feature.shape} and shape of "
-              f"content_features_of_content_image: {content_features_of_content_image.shape}")
+    gram_matrix_style_features = [gram_matrix(feature) for feature in style_image_features]
 
+    # for feature, gram_feature in zip(style_image_features, gram_matrix_style_features):
+    #     print(f"Shape of style_image_features: {feature.shape} and shape of "
+    #           f"content_features_of_content_image: {content_image_features.shape} "
+    #           f"gram_matrix_style_features : {gram_feature.shape}")
 
-    # for i in range(arguments.epochs):
-    #     optimizer.zero_grad()
-    #
-    #     features_of_init_image = forward_pass(init_image_tensor)
-    #     loss = calculateLoss(features_of_init_image, style_features_of_style_image, content_features_of_content_image)
-    #
-    #     loss.backward()
-    #     optimizer.step()
-    #
+    for i in range(arguments['epochs']):
+        optimizer.zero_grad()
+
+        init_image_features = forward_pass(init_image_tensor)
+        loss = calculateLoss(init_image_features, style_image_features, content_image_features, gram_matrix_style_features)
+
+        loss.backward()
+        optimizer.step()
+
     # save_as_Image(init_image_tensor, arguments.output_images_dir)
 
 
@@ -66,7 +65,9 @@ if __name__ == "__main__":
     parser.add_argument("--content_img_name", type=str, help="content image file name", default="cute_doggo.png")
     parser.add_argument("--style_img_name", type=str, help="style image file name", default="starry_night.png")
     parser.add_argument("--init_strategy", type=str, help="strategy to initiate base image", default="content")
-    parser.add_argument("--epochs", type=int, help="count of epochs", default=100)
+    parser.add_argument("--epochs", type=int, help="count of epochs", default=1)
+    parser.add_argument("--alpha", type=float, help="weight factor for content loss", default=1e5)
+    parser.add_argument("--beta", type=float, help="weight factor for style loss", default=3e4)
 
     args = parser.parse_args()
 
